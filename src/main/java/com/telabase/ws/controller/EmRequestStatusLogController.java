@@ -74,47 +74,51 @@ import com.google.gson.JsonElement;
 								deliverTime = log.getLogDate();
 							}
 						}
-					//	logger.info("assignTime "+assignTime);
-					//	logger.info("pickupTime "+pickupTime);
-					//	logger.info("pickupTime "+atpatientTime);
-					//	logger.info("deliverTime "+deliverTime);
-						double responseTimeMin = ((pickupTime.getTime() - assignTime.getTime()) / 1000) ;
-						double pickUpTimeMin = ((atpatientTime.getTime() - pickupTime.getTime()) / 1000) ;
-						double deliverTimeMin = ((deliverTime.getTime() - atpatientTime.getTime()) / 1000) ;
-						logger.info("assignTime "+assignTime.getTime());
-						logger.info("pickupTime "+pickupTime.getTime());
-						logger.info("deliverTime "+deliverTime.getTime());
-						logger.info("atpatientTime "+atpatientTime.getTime());
-						logger.info("responseTimeMin "+responseTimeMin);
-						logger.info("pickUpTimeMin "+pickUpTimeMin);
-						logger.info("deliverTimeMin "+deliverTimeMin);
+
 						EmCenterDAO centerDAO = new EmCenterDAO();
 						EmCenter center = centerDAO.findById(emreq.getEmCenterId());
-						
-						if(center.getAvgResponseRate() != 0)
-							center.setAvgResponseRate((center.getAvgResponseRate() + responseTimeMin)/2);
-						else 
-							center.setAvgResponseRate(responseTimeMin);
-						
-						if(center.getAvgPickupMinsTime() !=0)
-							center.setAvgPickupMinsTime((center.getAvgPickupMinsTime() + pickUpTimeMin)/2);
-						else
-							center.setAvgPickupMinsTime(pickUpTimeMin);
-						
-						if(center.getAvgDeliveryMinsTime() != 0)
-							center.setAvgDeliveryMinsTime((center.getAvgDeliveryMinsTime() + deliverTimeMin)/2);
-						else
-							center.setAvgDeliveryMinsTime(deliverTimeMin);
-						
+						if(pickupTime!=null && assignTime!=null ) {
+							double responseTimeMin = ((pickupTime.getTime() - assignTime.getTime()) / 1000) ;
+							logger.info("assignTime "+assignTime.getTime());
+							logger.info("responseTimeMin "+responseTimeMin);
+							
+							if(center.getAvgResponseRate() != 0)
+								center.setAvgResponseRate((center.getAvgResponseRate() + responseTimeMin)/2);
+							else 
+								center.setAvgResponseRate(responseTimeMin);
+						}
+						if(atpatientTime!=null && pickupTime!=null) {
+							double pickUpTimeMin = ((atpatientTime.getTime() - pickupTime.getTime()) / 1000) ;
+							logger.info("pickupTime "+pickupTime.getTime());
+							logger.info("pickUpTimeMin "+pickUpTimeMin);
+							
+							if(center.getAvgPickupMinsTime() !=0)
+								center.setAvgPickupMinsTime((center.getAvgPickupMinsTime() + pickUpTimeMin)/2);
+							else
+								center.setAvgPickupMinsTime(pickUpTimeMin);
+						}
+						if(deliverTime!=null && atpatientTime!=null) {
+							double deliverTimeMin = ((deliverTime.getTime() - atpatientTime.getTime()) / 1000) ;
+							logger.info("deliverTime "+deliverTime.getTime());
+							logger.info("atpatientTime "+atpatientTime.getTime());
+							logger.info("deliverTimeMin "+deliverTimeMin);
+							
+							if(center.getAvgDeliveryMinsTime() != 0)
+								center.setAvgDeliveryMinsTime((center.getAvgDeliveryMinsTime() + deliverTimeMin)/2);
+							else
+								center.setAvgDeliveryMinsTime(deliverTimeMin);
+						}
+
 						centerDAO.save(center);
 						
 					} else if(RequestStatus.getStatusIndex(o.getStatus())<4){
 						emreq.getPatient().setCurrentStatus("alert");
 						
 					}
-					else 
+					else {
 						emreq.getPatient().setCurrentStatus("beware");
-				
+					}
+					logger.info("set status "+emreq.getPatient().getId()+" to "+emreq.getPatient().getCurrentStatus());
 					pDAO.save(emreq.getPatient());
 					
 					if(RequestStatus.getStatusIndex(o.getStatus())<=1){

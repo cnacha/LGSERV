@@ -215,7 +215,7 @@ public class EmRequestController {
 		PatientDAO patientDAO = new PatientDAO();
 		Patient o = patientDAO.searchByPhone(request.getParameter("phone"));
 		if(o == null)
-			return new WSResponse("no patient found", WSResponse.STATUS_FAIL);
+			return new WSResponse("no patient found for "+request.getParameter("phone"), WSResponse.STATUS_FAIL);
 		
 		EmRequestDAO serve = new EmRequestDAO();
 		EmRequest req = new EmRequest();
@@ -345,6 +345,20 @@ public class EmRequestController {
 
 		return rs;
 	}
+	
+	@RequestMapping(value = "/api/emrequest/patient/latest", method = RequestMethod.GET)
+	@ResponseBody
+	public EmRequest getLatestRequestByPatient(HttpServletRequest request) {
+
+		long id = Long.parseLong(request.getParameter("id"));
+		EmRequestDAO dao = new EmRequestDAO();
+		List<EmRequest> rs = dao.findLatestEmRequestByPatientId(id);
+		if(rs!=null)
+			return rs.get(0);
+		else
+			return null;
+	}
+
 
 	@RequestMapping(value = "/api/emrequest/emcenter/list", method = RequestMethod.GET)
 	@ResponseBody
